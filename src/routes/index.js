@@ -1,12 +1,13 @@
 import React, { PureComponent, Fragment } from "react";
 import { connect } from "react-redux";
 import { Switch, Router, Route, Redirect } from "react-router-dom";
-import { AppState } from "../reduxStore/reducers";
 
 import setAuthToken from "../utils/setAuthToken";
 
+import LoginPage from "../pages/Login";
+
 // we will use this components for the restricted routes which can be accessed after login only
-const RestrictedRoute = props => (
+const RestrictedRoute = (props) => (
   <Fragment>
     {props.isLoggedIn === true ? (
       <Route path={props.path} component={props.component} />
@@ -17,7 +18,7 @@ const RestrictedRoute = props => (
 );
 
 // We will use this component for public routes which cannot be access after login
-const PublicRoute = props => (
+const PublicRoute = (props) => (
   <Fragment>
     {props.isLoggedIn === false ? (
       <Route path={props.path} component={props.component} />
@@ -39,15 +40,15 @@ class AppRoutes extends PureComponent {
       <div>
         <Router history={history}>
           <Switch>
-            {/* <Redirect exact from="/" to="/login" />
-            <PublicRoute
-              path="/register"
-              component={Register}
-              isLoggedIn={auth.isLoggedIn}
-            />
+            <Redirect exact from="/" to="/login" />
             <PublicRoute
               path="/login"
-              component={Login}
+              component={LoginPage}
+              isLoggedIn={auth.isLoggedIn}
+            />
+            {/* <PublicRoute
+              path="/register"
+              component={Register}
               isLoggedIn={auth.isLoggedIn}
             />
             <PublicRoute
@@ -63,13 +64,13 @@ class AppRoutes extends PureComponent {
 
             <Route path="/dashboard">
               <Switch>
-                <DashboardLayout>
-                  {/* <RestrictedRoute
+                {/* <DashboardLayout>
+                  <RestrictedRoute
                     path="/dashboard/home"
                     component={Dashboard}
                     isLoggedIn={auth.isLoggedIn}
-                  /> */}
-                </DashboardLayout>
+                  /> 
+                </DashboardLayout>*/}
               </Switch>
             </Route>
 
@@ -82,8 +83,8 @@ class AppRoutes extends PureComponent {
   }
 }
 
-const mapStateToProps = state => ({
-  auth: state.auth
+const mapStateToProps = (state) => ({
+  auth: state.auth,
 });
 
 export default connect(mapStateToProps, null)(AppRoutes);

@@ -21,7 +21,7 @@ const composeEnhancers =
 
 const persistConfig = {
   key: "root",
-  storage
+  storage,
 };
 
 const persistedReducer = persistReducer(persistConfig, reducers);

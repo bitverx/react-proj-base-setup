@@ -12,7 +12,7 @@
 
 ## Modules and packages being used
 
-1. Bootstrap and reactstrap is being used for responsiveness
+1. Tailwind CSS is being used for styles
 
 2. formik (https://jaredpalmer.com/formik) is being used for react forms whereever we can
 

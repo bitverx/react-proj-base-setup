@@ -1,10 +1,10 @@
 import { combineReducers } from "redux";
 import { routerReducer } from "react-router-redux";
-//import tempReducer from "../reduxStore/reducers/temp";
+import auth from "./reducers/auth";
 
 const appReducer = combineReducers({
-  router: routerReducer
-  //tempReducer
+  router: routerReducer,
+  auth,
 });
 
 const rootReducer = (_state, action) => {
