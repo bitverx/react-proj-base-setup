@@ -2,6 +2,9 @@
 
 (https://create-react-app.dev/)
 
+## Node LTS
+20.4.0
+
 ## To start the project
 
 1. npm install

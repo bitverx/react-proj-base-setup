@@ -1,38 +1,46 @@
-import { createStore, applyMiddleware, compose } from "redux";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import createSagaMiddleware from "redux-saga";
-import createHistory from "history/createBrowserHistory";
-import { routerMiddleware } from "react-router-redux";
-import { persistStore, persistReducer } from "redux-persist";
+import {
+  persistStore,
+  persistReducer,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from "redux-persist";
 import storage from "redux-persist/lib/storage";
-import reducers from "./reducers";
+import authReducer from "./reducers/auth";
 import rootSaga from "./sagas";
 
-const history = createHistory();
-const routeMiddleware = routerMiddleware(history);
 const sagaMiddleware = createSagaMiddleware();
-let middlewares = [sagaMiddleware, routeMiddleware];
-
-const composeEnhancers =
-  typeof window === "object" &&
-  process.env.NODE_ENV !== "production" &&
-  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-    ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({})
-    : compose;
 
 const persistConfig = {
   key: "root",
   storage,
 };
 
-const persistedReducer = persistReducer(persistConfig, reducers);
+const rootReducer = combineReducers({
+  auth: authReducer,
+});
 
-const store = createStore(
-  persistedReducer,
-  composeEnhancers(applyMiddleware(...middlewares))
-);
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+const store = configureStore({
+  reducer: persistedReducer,
+  devTools: process.env.NODE_ENV !== "production",
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      thunk: false,
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }).prepend(sagaMiddleware),
+});
 
 sagaMiddleware.run(rootSaga);
 
 const persistor = persistStore(store);
 
-export { store, history, persistor };
+export { store, persistor };

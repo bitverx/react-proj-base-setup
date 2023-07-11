@@ -1,87 +1,55 @@
-import React, { PureComponent, Fragment } from "react";
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
-import { Switch, Router, Route, Redirect } from "react-router-dom";
+import { Routes, BrowserRouter, Route, Navigate } from "react-router-dom";
+import axios from "axios";
+import { Helmet } from "react-helmet";
 
 import setAuthToken from "../utils/setAuthToken";
 
 import LoginPage from "../pages/Login";
+import ErrorBoundary from "../components/ErrorBoundary";
 
-// we will use this components for the restricted routes which can be accessed after login only
-const RestrictedRoute = (props) => (
-  <Fragment>
-    {props.isLoggedIn === true ? (
-      <Route path={props.path} component={props.component} />
-    ) : (
-      <Redirect to="/login" from={props.path} />
-    )}
-  </Fragment>
-);
+const axiosInstance = axios.create();
 
-// We will use this component for public routes which cannot be access after login
-const PublicRoute = (props) => (
-  <Fragment>
-    {props.isLoggedIn === false ? (
-      <Route path={props.path} component={props.component} />
-    ) : (
-      <Redirect to="/dashboard/home" from={props.path} />
-    )}
-  </Fragment>
-);
-
-class AppRoutes extends PureComponent {
-  render() {
-    const { history } = this.props;
-    const auth = this.props.auth;
-
+const AppRoutes = ({ auth }) => {
+  useEffect(() => {
     //set the token even after page refreshes
-    setAuthToken(auth.token ? auth.token : false);
+    setAuthToken(axiosInstance, auth.token ? auth.token : false);
 
-    return (
-      <div>
-        <Router history={history}>
-          <Switch>
-            <Redirect exact from="/" to="/login" />
-            <PublicRoute
-              path="/login"
-              component={LoginPage}
-              isLoggedIn={auth.isLoggedIn}
-            />
-            {/* <PublicRoute
-              path="/register"
-              component={Register}
-              isLoggedIn={auth.isLoggedIn}
-            />
-            <PublicRoute
-              path="/forgot-password"
-              component={ForgotPassword}
-              isLoggedIn={auth.isLoggedIn}
-            />
-            <PublicRoute
-              path="/reset-password"
-              component={ResetPassword}
-              isLoggedIn={auth.isLoggedIn}
-            /> */}
-
-            <Route path="/dashboard">
-              <Switch>
-                {/* <DashboardLayout>
-                  <RestrictedRoute
-                    path="/dashboard/home"
-                    component={Dashboard}
-                    isLoggedIn={auth.isLoggedIn}
-                  /> 
-                </DashboardLayout>*/}
-              </Switch>
-            </Route>
-
-            {/* <Route component={Error404} path="/404" /> */}
-            <Redirect from="*" to="/404" />
-          </Switch>
-        </Router>
-      </div>
+    axiosInstance.interceptors.response.use(
+      function (response) {
+        // Any status code that lie within the range of 2xx cause this function to trigger
+        // Do something with response data
+        return response;
+      },
+      function (error) {
+        if (error.response.status === 401) {
+          // logOutUser();
+        }
+        return Promise.reject(error);
+      },
     );
-  }
-}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auth]);
+
+  // Pass All common props through routes
+  const componentProps = {
+    Helmet,
+    auth,
+    axios: axiosInstance,
+  };
+
+  return (
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" render={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<LoginPage {...componentProps} />} />
+        </Routes>
+      </BrowserRouter>
+    </ErrorBoundary>
+  );
+};
 
 const mapStateToProps = (state) => ({
   auth: state.auth,
